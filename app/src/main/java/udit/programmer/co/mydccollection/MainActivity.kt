@@ -5,6 +5,7 @@ import android.graphics.Movie
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -91,7 +92,6 @@ class MainActivity : AppCompatActivity() {
         R.drawable.shazam,
         R.drawable.jokar
     )
-
     val links = arrayOf(
         "en.wikipedia.org/wiki/Superman_and_the_Mole_Men",
         "en.wikipedia.org/wiki/Stamp_Day_for_Superman",
@@ -127,7 +127,6 @@ class MainActivity : AppCompatActivity() {
         "en.wikipedia.org/wiki/Joker_(2019_film)"
 
     )
-
     val posi = arrayOf(
         0, 1, 2, 3,
         4, 5, 6, 7,
@@ -139,40 +138,37 @@ class MainActivity : AppCompatActivity() {
         28, 29, 30, 31
     )
 
-    val list1: ArrayList<Movies> = arrayListOf()
+    val list: ArrayList<Movies> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        for (i in 0..31) {
-            list1.add(
-                Movies(
-                    moviesn[i],
-                    years[i],
-                    images[i],
-                    links[i],
-                    posi[i]
-                )
-            )
+        for (i in 0..30) {
+            list.add(Movies(moviesn[i], years[i], images[i], links[i], posi[i]))
         }
 
-        rv.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        val na = MovieAdapter(list)
 
-        val na = MovieAdapter(list1)
+        val layoutManager = GridLayoutManager(this, 2)
+        layoutManager.orientation = RecyclerView.VERTICAL
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return when (na.getItemViewType(position)) {
+                    1 -> 1
+                    0 -> 2
+                    else -> -1
+                }
+            }
+        }
+
+        rv.layoutManager = layoutManager
         na.onItemClickListener = object : MovieOnItemClickListener {
             override fun onClick(movie: Movies) {
-
                 val i = Intent(Intent.ACTION_VIEW, Uri.parse("http://${movie.link}"))
                 startActivity(Intent.createChooser(i, "Select Browser"))
-
             }
-
         }
-
         rv.adapter = na
-        // rv.adapter = MovieAdapter(list1)
-
-
     }
 }
